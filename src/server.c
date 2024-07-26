@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #define PORT 2135
 
