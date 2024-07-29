@@ -1,24 +1,22 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
 int main(int argc, char** argv) {
 
-	const int server_socket_fd = socket(AF_INET, SOCK_STREAM, 0); //Creating the server socket file descriptor and saving it into socket_fd
-	const struct in_addr *loopback_addr = malloc(4); //Allocate 4 bytes (32bit) pointer to save the in_addr struct in network byte order
+	const int server_socket_fd = socket(AF_INET, SOCK_STREAM, 0); //Saving server socket file descriptor given by socket()
 	
-	inet_pton(AF_INET, "127.0.0.1", loopback_addr); //Convert loopback address to network byte order and send it to loopback_addr
+	//Server address structure
+	struct sockaddr_in server_address;
+	server_address.sin_family = AF_INET;
+	server_address.sin_port = htons(33); //Convert port 33 into network byte order
+	inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr); //Convert loopback address to network byte order
 
-	const struct sockaddr_in server_address {
-		AF_INET
-		htons(33); //Convert port into network byte order
-		*loopback_addr //Retrieve the in_addr struct saved in this pointer
-	}
+	bind(server_socket_fd, (const struct sockaddr *)&server_address, sizeof(server_address)); //Binding server address structure to local socket
 
-	bind(server_socket_fd, &server_address, sizeof(server_address));
+	listen(server_socket_fd, 1); //Start listening for connections on the socket
 
-	listen(server_socket_fd, 1);
+	accept(server_socket_fd, NULL, NULL);
 
 	return 0;	
 }
