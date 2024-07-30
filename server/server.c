@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 	
 	fprintf(stdout, "Connection stablished with client\n");
 
-	send(client_inc_socket, "Hello client", sizeof("Hello client"), 0; //Send client hello to the client
+	send(client_inc_socket, "Hello client", sizeof("Hello client"), 0); //Send client hello to the client
 	
 	fprintf(stdout, "We have sent client hello to the client\n");
 
