@@ -32,14 +32,49 @@ int main(int argc, char **argv) {
 	server_address.sin_port = htons(localPort); //Convert port into network byte order
 	inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr); //Convert loopback address into network byte order
 	//Bind server address structure to server socket
-	if (bind(servSock_fd, &server_address, sizeof(server_address)) != 0) { //Check for succesful binding
+	if ((bind(servSock_fd, (const struct sockaddr *)&server_address, sizeof(server_address))) != 0) { //Check for succesful binding
 		fprintf(stderr, "Failed binding server address to local socket, aborting...\n");
+		close(servSock_fd);
 		return 1;
 	}
 	fprintf(stdout, "Server address succesfully bound to local socket\n");
 	//Listen for incoming conections from clients
-	listen();
-
-	close(servSock_fd); //Close the server socket
+	//Set server local socket as listening with a max of 5 connections in queue and check for succesful completion
+	if ((listen(servSock_fd, 5)) != 0) {
+		fprintf(stderr, "Failed to set socket state as <listening>\n");
+		close(servSock_fd);
+		return 1;
+	}
+	fprintf(stdout, "Server local socket is now listening for incoming connections\n");
+	//Start connection handler (loop)
+	while (1) {
+		int inc_fd = accept(servSock_fd, NULL, NULL); //Accept the next incoming connection to the socket, null to throw incoming address
+		if (inc_fd == -1) { //If accept() returns -1, there are no more connections to handle, server local socket is closed
+			fprintf(stdout, "No more incoming connections to accept\n");
+			close(servSock_fd);
+			return 0;
+		}
+		char *buffer = malloc(sizeof(char) * 6); //Allocate buffer for message "Hello" (null-terminated)
+		int bytesRec = recv(inc_fd, buffer, (sizeof(char) * 6), 0); //Call recv() and save its return value into bytesRec
+		if (bytesRec == -1) { //If bytesRec equals -1 an error ocurred, abort
+			fprintf(stderr, "Error trying to read from current connection socket\n");
+			free(buffer);
+			close(inc_fd);
+			close(servSock_fd);
+			return 1;
+		} else if (bytesRec == 0) { //If bytesRec equals 0 the connection was gracefully closed
+			fprintf(stdout, "Connection has been closed by the client gracefully, no more data will be sent\n");
+			free(buffer);
+			close(inc_fd);
+			close(servSock_fd);
+			return 0;
+		} //Else, on a positive integer
+		fprintf(stdout, "Bytes read from current connection socket: %d", bytesRec);
+		fprintf(stdout, "Message from client: %s", buffer);
+		free(buffer);
+		close(inc_fd);
+		close(servSock_fd);
+		break;
+	}
 	return 0;
 }

@@ -15,11 +15,7 @@ int main(int argc, char **argv) {
 	
 	fprintf(stdout, "Connection stablished\n");
 
-	char buffer[13];	
-
-	recv(client_socket_fd, &buffer, sizeof(buffer), 0);
-
-	fprintf(stdout, "Message received -> %s\n", buffer);
+	send(client_socket_fd, "Hello", sizeof("Hello"), 0);
 
 	close(client_socket_fd);
 	return 0;
