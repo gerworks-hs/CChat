@@ -67,8 +67,8 @@ int main(int argc, char **argv) {
 			return 0;
 		} //Else, on a positive integer
 		buffer[bytesRec] = '\0';
-		fprintf(stdout, "Bytes read from current connection socket: %d", bytesRec);
-		fprintf(stdout, "Message from client: %s", buffer);
+		fprintf(stdout, "Bytes read from current connection socket: %d\n", bytesRec);
+		fprintf(stdout, "Message from client: %s\n", buffer);
 		close(inc_fd);
 		break;
 	}
